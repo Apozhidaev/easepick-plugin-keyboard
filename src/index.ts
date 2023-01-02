@@ -3,6 +3,7 @@ import { BasePlugin, IPlugin, IBaseConfig } from "@easepick/base-plugin";
 export interface IKeyboardPlugin extends IBaseConfig {
   unitIndex?: number;
   dayIndex?: number;
+  openHotkeys?: string[];
 }
 
 declare module "@easepick/core/dist/types" {
@@ -21,6 +22,7 @@ export class KeyboardPlugin extends BasePlugin implements IPlugin {
   public options: IKeyboardPlugin = {
     unitIndex: 1,
     dayIndex: 2,
+    openHotkeys: ["Enter", "Space"],
   };
 
   /**
@@ -38,7 +40,9 @@ export class KeyboardPlugin extends BasePlugin implements IPlugin {
    */
   public onAttach(): void {
     const element = this.picker.options.element as HTMLElement;
-    element.addEventListener("keydown", this.binds.handleShow, { capture: true });
+    element.addEventListener("keydown", this.binds.handleShow, {
+      capture: true,
+    });
 
     this.picker.on("keydown", this.binds.onKeydown);
 
@@ -78,15 +82,15 @@ export class KeyboardPlugin extends BasePlugin implements IPlugin {
   }
 
   private handleShow(event: KeyboardEvent) {
-    switch (event.code) {
-      case "Enter":
-      case "Space":
+    const { openHotkeys } = this.options;
+    switch (true) {
+      case openHotkeys?.includes(event.code):
         event.preventDefault();
 
         this.picker.show({ target: this.picker.options.element });
         break;
 
-      case "Escape":
+      case ["Escape"].includes(event.code):
         this.picker.hide();
         break;
     }
